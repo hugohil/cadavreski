@@ -1,3 +1,4 @@
 node_modules/
 server/auth.js
 *.log
+public/poemes/*.txt
