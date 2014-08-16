@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+        <link rel="stylesheet" href="/css/style.css">
+  </head>
+
+  <body>    
+    <div class="wrap">
+
+      <div id="login">
+        <form id="loginform" class="loginform">
+          <h1>Cadavreski</h1>
+          <p>Jeu collectif en ligne de <a href="http://fr.wikipedia.org/wiki/Cadavre_exquis" target='_blank'>cadavre exquis</a>, cadavreski vous permet d'écrire des poèmes participatifs en n'ayant que les deux derniers mots du vers précédent.<br>
+          Une fois votre contribution apportée, laissez-le tourner seul ou invitez un ami à prendre la main. Lorsqu'il sera fini, le poème vous sera transmis par email.</p>
+          <input type="text" name="login" id="username" placeholder="Nom d'utilisateur"><br>
+          <input type="email" name="usermail" id="usermail" placeholder="Adresse email"><br>
+          <input type="submit" class="btn" value="Envoyer"><br>
+  
+          <footer class="notes">
+            <small>Notez que les adresses données sont immédiatement supprimées du serveur à l'envoi du mail. Elles ne servent qu'une fois, ne sont conservées nulle part et, bien entendu, ne sont communiquées à personne.</small>
+          </footer>
+        </form>
+      </div>
+
+      <div id="fold"></div>
+
+      <div id="txt">
+        <form id="txtform" name="poemform">
+          <textarea id="txtarea" class="zonetexte" name="poeme" readonly></textarea>
+          <input type="submit" class="btn" id="send" value="Envoyer !" class="submit"/>
+          <div class="info">
+            <div></div>
+            <span id="infotxt"></span>
+          </div>
+        </form>
+      </div>
+
+      <div id="givetitle" class="givetitle">
+        <form id="titleform" name"titleform">
+          <p>Le poème est fini !<br>Donne lui un titre :</p>
+          <input type="text" name"poemetitle" id="poemetitle" placeholder="Titre du poème">
+          <input type="submit" class="btn" value="Envoyer">
+        </form>
+      </div>
+ 
+      <div id="tellfriend" class="tellfriend">
+        <form id="friendform" name="friendform">
+          <p>Invitez vos amis à participer !</p>
+          <input type="text" name"yourname" id="yourname" placeholder="Votre nom"><br>
+          <input type="text" name"friendsmail" id="friendsmail" placeholder="Déstinataire(s)"><br>
+          <span>Pour inviter plusieurs amis, séparez simplement les adresses par une virgule</span><br>
+          <input type="submit" class="btn" value="Envoyer">
+        </form>
+      </div>
+
+    </div>
+
+    <a href="https://github.com/hugohil/cadavreski" target="_blank"><img style="position: absolute; top: 0; right: 0; border: 0; z-index: 2002" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js" type="text/javascript"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/client.js" type="text/javascript"></script>
+  </body>
+</html>
