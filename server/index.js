@@ -1,9 +1,9 @@
 var express = require('express');
 var app = express();
 var path = require('path');
-var fs = require('fs');
-var nodemailer = require('nodemailer');
 var settings = require('./settings');
+var mandrill = require('mandrill-api/mandrill');
+var mandrill_client = new mandrill.Mandrill(settings.auth.API_KEY);
 
 var dirnameArray = __dirname.split('/');
 rootdir = dirnameArray.splice(0, dirnameArray.length - 1).join('/');
@@ -17,18 +17,8 @@ app.use(express.static(path.join(rootdir, '/public')));
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 
-server.listen(settings.config.port, function(){
+server.listen(settings.port, function(){
     console.log('Listening on port %d', server.address().port);
-});
-
-var smtpTransport = nodemailer.createTransport("SMTP", {
-    host: settings.auth.host,
-    secureConnection: settings.auth.secure,
-    port: settings.auth.port,
-    auth: {
-        user: settings.auth.addr,
-        pass: settings.auth.pass
-    }
 });
 
 var poeme = '';
@@ -50,13 +40,8 @@ function switchUser(socketID) {
     if(next >= users.length) next = 0;
     var nextUser = users[next];
 
-    nextUser !== socketID ? io.to(nextUser).emit('turn') : someonesTurn = false;
+    (nextUser !== socketID) ? io.to(nextUser).emit('turn') : someonesTurn = false;
 };
-
-var saveFolder = "./public/poemes/";
-fs.exists(saveFolder, function (exists){
-    if(!exists) fs.mkdir(saveFolder);
-});
 
 io.on('connection', function (socket){
 
@@ -67,7 +52,7 @@ io.on('connection', function (socket){
         socket.emit('logged');
 
         users.push(socketID);
-        if(mailList.indexOf(u.mail) == -1) mailList.push(u.mail);
+        if(mailList.indexOf(u.mail) == -1 && u.mail.length > 1) mailList.push(u.mail);
 
         if(users.length <= 1 || !someonesTurn) socket.emit('turn');
         if(lastwords.length > 0) socket.emit('receptxt', lastwords);
@@ -110,73 +95,47 @@ io.on('connection', function (socket){
     })
 
     /*==========  PARTAGE  ==========*/ 
-    socket.on('saveThis', function (save){
-
-            title = save.isFinal ? save.poemeTitle : 'tmp';
-
-            var escapedTitle = title.replace(/[^a-zA-Z0-9]/g,'-');
-            var fileName = escapedTitle + ".txt";
-
-            while ( fs.existsSync(saveFolder + fileName) && save.isFinal){
-                fileNumber += 1;
-                fileName = escapedTitle + "_" + fileNumber + ".txt";
-            };
-
-            fs.writeFile( saveFolder+fileName, poeme, function (err){
-                if(err) throw err;
-                else console.log('  > New poeme saved as "'+fileName+'" !');
-            });
-
-            if(save.isFinal){
-                var sendPoeme = {
-                    from : auth.addr,
-                    to : mailList,
-                    subject : title,
-                    html : "<h1>Le poème est fini !</h1><br>Tu peux le lire en pièce jointe. Tu peux aussi participer encore, ou faire participer des amis !<br><h3><a href='http://cadavreski.jit.su/'>cadavreski</a></h3>",
-                    text : "Le poème est fini ! Tu peux le lire en pièce jointe, participer à nouveau ou inviter des amis à participer sur http://cadavreski.jit.su/ !",
-                    attachments : { filePath : saveFolder+fileName }
-                }
-            } else {
-                var sendPoeme = {
-                    from : auth.addr,
-                    to : auth.addr,
-                    subject : "Du nouveau sur cadavreski !",
-                    text : poeme.length+' / '+poemeLength,
-                    attachments : { filePath : saveFolder+fileName }
-                }
+    socket.on('finished', function (title){
+        mandrill_client.messages.send({
+            "message": {
+                "html": 'hello',
+                "text": 'hello',
+                "subject": 'Cadavreski - ' + title,
+                "from_email": settings.auth.sender,
+                "to":[{
+                    "email": mailList
+                }],
+                "attachments": [{
+                    "type": 'text/plain',
+                    "name": title,
+                    "content": new Buffer(poeme).toString('base64'),
+                }]
             }
-
-            smtpTransport.sendMail(sendPoeme, function (error, response){
-                if(error){
-                    console.log(error);
-                }else{
-                    console.log("Message sent: " + response.message);
-                }
-            });
-
-            if(save.isFinal){
-                mailList.length = 0;
-                poeme = '';
-                poemeLength = setPoemeLength(2000,3000);
-            }
+        }, function (result) {
+            console.log(result);
+            mailList.length = 0;
+            poeme = '';
+            poemeLength = setPoemeLength(2000,3000);
+        }, function (e) {
+            console.log('A mandrill error occurred: ' + e.name + ' - ' + e.message);
+        });
     });
 
-    socket.on('sendFriend', function (mailData){
-        if (mailData.addr == '') mailData.addr = "Un joueur anonyme";
-        var friendMail = {
-            from : auth.addr,
-            to : mailData.addr,
-            subject : "Cadavreski",
-            html : "Salut !<br>"+mailData.from+" t'as envoyé un lien vers <a href='http://cadavreski.jit.su/' target='_blank'>cadavreski</a>.",
-            text : "Salut ! "+mailData.from+" t'as envoyé un lien vers http://cadavreski.jit.su/ ."
-        };
-
-        smtpTransport.sendMail(friendMail, function (error, response){
-            if(error){
-                console.log(error);
-            }else{
-                console.log("Message sent from "+mailData.from+" to : "+mailData.addr+" : " + response.message);
+    socket.on('sendFriend', function (data){
+        mandrill_client.messages.send({
+            "message": {
+                "html": 'hello from ' + data.from,
+                "text": 'hello from ' + data.from,
+                "subject": 'Cadavreski',
+                "from_email": settings.auth.sender,
+                "to":[{
+                    "email": data.to
+                }]
             }
+        }, function (result) {
+            console.log(result);
+        }, function (e) {
+            console.log('A mandrill error occurred: ' + e.name + ' - ' + e.message);
         });
     })
 
@@ -187,3 +146,5 @@ io.on('connection', function (socket){
     });
 
 })
+
+

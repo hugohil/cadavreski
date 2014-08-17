@@ -1,5 +1,5 @@
 var host = document.domain;
-var port = host !== 'localhost' ? 80 : 3000;
+var port = (host !== 'localhost') ? 80 : 3000;
 
 var socket = io.connect('http://' + host + ':' + port);
 var username;
@@ -19,23 +19,21 @@ var username;
       $('#fold').fadeIn(500);
     });
     $('#txtarea').focus();
-    $(".info").append('<span id="info-txt">ce n\'est pas votre tour.</span>');
   })
 
   /*==========  PERMISSION  ==========*/
   var ucan;
 
   socket.on('turn', function(){
-    if(ucan) {
-      return false;
-    }
+    if(ucan) return false;
 
     socket.emit('turnCallback');
 
     ucan = true;
     $('#txtarea').removeAttr('readonly');
 
-    $('#info-txt').remove();
+    // $('#info-txt').remove();
+    $("#info-txt").html('Vous pouvez écrire.');
     $('.info').addClass('active');
   })
 
@@ -45,12 +43,12 @@ var username;
 
     if(ucan){
       if( $('#txtarea').val() == ''){
-        alert('Il faut écrire !');
+        printMessage('Il faut écrire !');
         return false;
       }else{
         socket.emit('txtsend', $('#txtarea').val()).emit('saveThis',false);
         ucan = false;
-        $(".info").append('<span id="info-txt">ce n\'est pas votre tour.</span>');
+        $("#info-txt").html('Ce n\'est pas votre tour.');
         $(".info").removeClass("active");
       }
       $('#txtarea').attr('readonly','true');
@@ -81,12 +79,9 @@ var username;
   /*==========  FAIRE TOURNER  ==========*/
   socket.on('tellFriend', function(){
     if( username != null ) $('#yourname').hide();
+   
     $('#tellfriend').fadeIn(500);
   })
-
-  $('body').click(function(){
-    $('#tellfriend').fadeOut(200);
-  });
 
   $('#friendform').click(function (e){
     e.stopPropagation();
@@ -98,10 +93,10 @@ var username;
     if( username == null) username = $('#yourname').val();
     
     if( $('#friendsmail').val() != '' && username != null ) {
-      socket.emit("sendFriend", {addr: $('#friendsmail').val(), from: username});
+      socket.emit("sendFriend", {to: $('#friendsmail').val(), from: username});
     }
     $('#tellfriend').fadeOut(200);
-    return false;
+    printMessage('Votre invitation a bien été envoyée.');
   })
 
   /*==========  DONNER UN TITRE  ==========*/
@@ -109,7 +104,7 @@ var username;
     $("#givetitle").fadeIn(500);
   });
 
-    $('body').click(function(){
+  $('body').click(function(){
     $('#givetitle').fadeOut(200);
   });
 
@@ -121,12 +116,34 @@ var username;
     event.preventDefault();
 
     if($('#poemetitle').val() == ''){
-      alert('Vous devez donner un titre !');
-    }else{
-      socket.emit('saveThis', {poemeTitle: $('#poemetitle').val(), isFinal: true});
+      printMessage('Vous devez donner un titre !');
+    } else {
+      socket.emit('finished', $('#poemetitle').val());
     }
     $('#givetitle').fadeOut(200);
-    return false;
+  });
+
+  /*==========  UTILITIES  ==========*/
+  function printMessage(message) {
+    $('#message .content').html(message);
+    $('#message').fadeIn(500);
+    window.setTimeout(function(){
+      clearMessage(500)
+    }, 4000);
+  }
+
+  function clearMessage(delay){
+    console.log('clearing !');
+    $('#message').fadeOut(delay, function(){
+      $('#message .content').empty();
+    });
+  }
+
+  $('body').click(function (event){
+    if($('#tellfriend').css('display') !== 'none' || $('#message').css('display') !== 'none'){
+      $('#tellfriend').fadeOut(200);
+      clearMessage(200);
+    }
   });
 
 })(jQuery);

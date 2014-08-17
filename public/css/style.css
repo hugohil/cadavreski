@@ -87,8 +87,9 @@ input.btn:hover {
 }
 
 #txt, #fold,
-#givetitle,
-.tellfriend {
+.givetitle,
+.tellfriend,
+.message {
   display: none;
   clear: both;
 }
@@ -122,12 +123,16 @@ input.btn:hover {
 }
 
 .info {
-  float: right;
-  margin: 10px 20px 0 0;
+  text-align: right;
+  margin: 10px -40px 0 0;
 }
 
-.info div {
-  float: right;
+.info #info-txt:before {
+  content: '';
+  display: inline-block;
+  margin-right: 8px;
+  line-height: 12px;
+  vertical-align: middle;
   width: 12px;
   height: 12px;
   border-radius: 50%;
@@ -136,26 +141,18 @@ input.btn:hover {
   -webkit-transition: background-color 0.3s;
 }
 
-.info.active div {
+.info.active #info-txt:before {
   background-color: #A7C161;
 }
 
 #info-txt {
-  margin-right: 10px;
   font-size: 10px;
   line-height: 15px;
 }
 
-#infotxt {
-  visibility: hidden;
-}
-
-.info:hover + #infotxt {
-  visibility: visible;
-}
-
 .tellfriend,
-.givetitle {
+.givetitle,
+.message {
   position: absolute;
   z-index: 1000;
   width: 100%;
@@ -163,11 +160,12 @@ input.btn:hover {
   top: 0;
   left: 0;
   text-align: center;
-  background-color: rgba(0,0,0,0.3);
+  background-color: rgba(0, 0, 0, 0.3);
 }
 
 .tellfriend #friendform,
-.givetitle #titleform {
+.givetitle #titleform,
+.message .content {
   width: 250px;
   margin: 100px auto 0;
   padding: 30px 50px;
@@ -175,7 +173,8 @@ input.btn:hover {
 }
 
 .tellfriend p,
-.givetitle p {
+.givetitle p,
+.message p {
   color: #AAA;
   margin-bottom: 20px;
 }

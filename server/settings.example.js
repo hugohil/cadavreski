@@ -1,10 +1,6 @@
-exports.config = {
-    port: process.env.PORT || 3000
-}
+exports.port = process.env.PORT || 3000;
+
 exports.auth = {
-    host: 'protocol.domain.xx',
-    port: 465, // for SSL
-    secure: true,
-    addr: 'mail@domain.xx',
-    pass: 'XXXX'
+    API_KEY: 'YOUR_MANDRILL_API_KEY'
+    sender: "host@domain.com"
 }
