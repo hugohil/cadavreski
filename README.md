@@ -21,7 +21,7 @@ cd cadavreski
 npm install
 ```
 
-Il vous faudra enfin renommer le fichier `auth.example.js` présent dans le répertoire `server/` en `auth.js` et y mettre les informations correspondantes à votre serveur d'emails.
+Il vous faudra enfin renommer le fichier `settings.example.js` présent dans le répertoire `server/` en `settings.js` et y mettre les informations correspondantes à votre serveur d'emails.
 
 ### Licence
 

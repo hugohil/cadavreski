@@ -3,13 +3,13 @@ var app = express();
 var path = require('path');
 var fs = require('fs');
 var nodemailer = require('nodemailer');
-var auth = require('./auth');
+var settings = require('./settings');
 
 var dirnameArray = __dirname.split('/');
-    rootdir = dirnameArray.splice(0, dirnameArray.length - 1).join('/');
-console.log('root is %s', rootdir);
+rootdir = dirnameArray.splice(0, dirnameArray.length - 1).join('/');
+
 app.get('/', function (req, res) {
-  res.sendfile(rootdir + '/views/index.html');
+    res.sendfile(rootdir + '/views/index.html');
 });
 
 app.use(express.static(path.join(rootdir, '/public')));
@@ -17,17 +17,17 @@ app.use(express.static(path.join(rootdir, '/public')));
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 
-server.listen(3000, function(){
+server.listen(settings.config.port, function(){
     console.log('Listening on port %d', server.address().port);
 });
 
 var smtpTransport = nodemailer.createTransport("SMTP", {
-    host: auth.host,
-    secureConnection: auth.secure,
-    port: auth.port,
+    host: settings.auth.host,
+    secureConnection: settings.auth.secure,
+    port: settings.auth.port,
     auth: {
-        user: auth.addr,
-        pass: auth.pass
+        user: settings.auth.addr,
+        pass: settings.auth.pass
     }
 });
 

@@ -1,10 +1,11 @@
+var host = document.domain;
+var port = host !== 'localhost' ? 80 : 3000;
+
+var socket = io.connect('http://' + host + ':' + port);
+var username;
+
 (function(){
-
-  var socket = io.connect('http://localhost:3000');
-  var username;
-
   /*==========  LOGIN  ==========*/
-  
   $('#loginform').submit(function (event){
     event.preventDefault();
     socket.emit('login', { name : $('#username').val(), mail : $('#usermail').val() } );
@@ -21,8 +22,7 @@
     $(".info").append('<span id="info-txt">ce n\'est pas votre tour.</span>');
   })
 
-  /*==========  PERMISSION  ==========*/  
-
+  /*==========  PERMISSION  ==========*/
   var ucan;
 
   socket.on('turn', function(){
@@ -40,7 +40,6 @@
   })
 
   /*==========  ENVOYER TEXTE  ==========*/
-
   $('#txtform').submit(function (event){
     event.preventDefault();
 
@@ -62,7 +61,6 @@
   })
 
   /*==========  RECEVOIR TEXTE  ==========*/
-  
   socket.on('receptxt', function (words){
     console.log(words);
 
@@ -80,8 +78,7 @@
 
   })
 
-  /*==========  FAIRE TOURNER  ==========*/  
-
+  /*==========  FAIRE TOURNER  ==========*/
   socket.on('tellFriend', function(){
     if( username != null ) $('#yourname').hide();
     $('#tellfriend').fadeIn(500);
@@ -107,8 +104,7 @@
     return false;
   })
 
-  /*==========  DONNER UN TITRE  ==========*/  
-
+  /*==========  DONNER UN TITRE  ==========*/
   socket.on('finishHim', function(){
     $("#givetitle").fadeIn(500);
   });
